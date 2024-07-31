@@ -1,0 +1,2 @@
+# blogator
+Blog aggregator

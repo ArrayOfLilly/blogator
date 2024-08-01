@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+
+	_ "github.com/lib/pq"
 	"github.com/joho/godotenv"
 	"github.com/ArrayOfLilly/blogator/internal/database"
 )
@@ -26,11 +29,29 @@ func main(){
 		log.Fatal("PORT environment variable is not set")
 	}
 
+	dbURL := os.Getenv("CONN")
+	if dbURL == "" {
+		log.Fatal("CONN environment variable is not set")
+	}
+
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatal("unsucessful database connection")
+	}
+
+	dbQueries := database.New(db)
+
+	apiCfg := apiConfig{
+		DB: dbQueries,
+	}
+
 	// new router
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /v1/healthz", handlerReadiness)
 	mux.HandleFunc("GET /v1/err", handlerErr)
+
+	mux.HandleFunc("POST /v1/users", apiCfg.handleUsersCreate)
 
 	// new server (port and router)
 	srv := &http.Server{

@@ -6,7 +6,12 @@ import (
 	"net/http"
 	"os"
 	"github.com/joho/godotenv"
+	"github.com/ArrayOfLilly/blogator/internal/database"
 )
+
+type apiConfig struct {
+	DB *database.Queries
+}
 
 func main(){
 	filepathRoot := "."
@@ -25,7 +30,7 @@ func main(){
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /v1/healthz", handlerReadiness)
-	mux.HandleFunc("GET /v1/err", handlerError)
+	mux.HandleFunc("GET /v1/err", handlerErr)
 
 	// new server (port and router)
 	srv := &http.Server{
